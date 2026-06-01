@@ -4,7 +4,7 @@
 PlayerSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 28
-  productGUID: 1e16cb0234fac524d850f04e80a987f1
+  productGUID: a412cec19000d68448dbaa539a7e0153
   AndroidProfiler: 0
   AndroidFilterTouchesWhenObscured: 0
   AndroidEnableSustainedPerformanceMode: 0
@@ -932,10 +932,10 @@ PlayerSettings:
   activeInputHandler: 1
   windowsGamepadBackendHint: 0
   enableDirectStorage: 0
-  cloudProjectId: 3be5ca47-ea22-4a16-a964-29191b774a44
+  cloudProjectId: 4704f009-97a3-4e13-a95b-e089cf493ab1
   framebufferDepthMemorylessMode: 0
   qualitySettingsNames: []
-  projectName: Estrellarse 2026-04-24_14-02-45
+  projectName: Estrellarse 2026-04-24_13-34-15
   organizationId: totd-games
   cloudEnabled: 0
   legacyClampBlendShapeWeights: 0
