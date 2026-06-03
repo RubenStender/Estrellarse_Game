@@ -755,7 +755,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Reloader
   magazineSize: 30
   reserveAmmo: 120
-  infiniteAmmo: 0
+  infiniteAmmo: 1
   reloadTime: 1.8
   autoReload: 1
   OnAmmoChanged:
