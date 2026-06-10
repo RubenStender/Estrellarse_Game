@@ -11,6 +11,10 @@ public class Slide : MonoBehaviour, IMovementModifier
     [SerializeField] private float slideFriction = 4f;
     [SerializeField] private float minSpeedToSlide = 6f;
 
+    [Header("Slope Settings")]
+    [SerializeField] private float slopeBoostMultiplier = 2.5f;
+    [SerializeField] private float slopeCheckDistance = 1.2f;
+
     [Header("Crouch")]
     [SerializeField] private float crouchHeight = 1f;
     [SerializeField] private float normalHeight = 2f;
@@ -21,8 +25,12 @@ public class Slide : MonoBehaviour, IMovementModifier
     [SerializeField] private float crouchCameraY = 0.8f;
     [SerializeField] private float lerpSpeed = 14f;
 
+    [Header("Camera Tilt")]
+    [SerializeField] private float slideTiltAngle = 8f;
+
     public bool IsSliding => _isSliding;
     public bool IsActive => _isSliding;
+    public float CameraTiltTarget => _isSliding ? slideTiltAngle : 0f;
 
     private CharacterMotor _motor;
     private WalkRun _walkRun;
@@ -63,6 +71,14 @@ public class Slide : MonoBehaviour, IMovementModifier
     {
         if (!_isSliding) return Vector3.zero;
 
+        Vector3 groundNormal = GetGroundNormal();
+        if (groundNormal != Vector3.up)
+        {
+            _slideVelocity = Vector3.ProjectOnPlane(_slideVelocity, groundNormal);
+            Vector3 gravityAlongSlope = Vector3.ProjectOnPlane(Physics.gravity, groundNormal);
+            _slideVelocity += gravityAlongSlope * Time.fixedDeltaTime;
+        }
+
         _slideVelocity = Vector3.MoveTowards(_slideVelocity, Vector3.zero,
             slideFriction * Time.fixedDeltaTime);
 
@@ -73,11 +89,15 @@ public class Slide : MonoBehaviour, IMovementModifier
     private IEnumerator SlideRoutine()
     {
         _isSliding = true;
-        _slideVelocity = transform.forward * slideForce;
         _motor.Controller.height = crouchHeight;
 
-        yield return new WaitForSeconds(slideDuration);
+        Vector3 groundNormal = GetGroundNormal();
+        Vector3 slideDir = Vector3.ProjectOnPlane(transform.forward, groundNormal).normalized;
+        float slopeDot = Vector3.Dot(groundNormal, Vector3.up);
+        float slopeBoost = Mathf.Lerp(slopeBoostMultiplier, 1f, slopeDot);
+        _slideVelocity = slideDir * (slideForce * slopeBoost);
 
+        yield return new WaitForSeconds(slideDuration);
         EndSlide();
     }
 
@@ -86,5 +106,12 @@ public class Slide : MonoBehaviour, IMovementModifier
         _isSliding = false;
         _slideVelocity = Vector3.zero;
         _motor.Controller.height = normalHeight;
+    }
+
+    private Vector3 GetGroundNormal()
+    {
+        if (Physics.Raycast(transform.position, Vector3.down, out RaycastHit hit, slopeCheckDistance))
+            return hit.normal;
+        return Vector3.up;
     }
 }

@@ -9,9 +9,13 @@ public class Shooter : MonoBehaviour
     [SerializeField] private float fireRate = 0.1f;
     [SerializeField] private LayerMask hitMask = ~0;
 
+    [Header("Shotgun")]
+    [SerializeField] private int pelletCount = 8;
+    [SerializeField] private AnimationCurve damageFalloff = AnimationCurve.EaseInOut(0f, 1f, 1f, 0.2f);
+
     [Header("Spread")]
-    [SerializeField] private float baseSpread = 0.02f;
-    [SerializeField] private float adsSpread = 0.002f;
+    [SerializeField] private float baseSpread = 0.1f;
+    [SerializeField] private float adsSpread = 0.05f;
 
     [Header("References")]
     [SerializeField] private Transform firePoint;
@@ -24,7 +28,6 @@ public class Shooter : MonoBehaviour
 
     private Reloader _reloader;
     private ADS _ads;
-
     public bool IsADS => _ads != null && _ads.IsAiming;
 
     private float _nextFireTime;
@@ -33,7 +36,6 @@ public class Shooter : MonoBehaviour
     {
         _reloader = GetComponent<Reloader>();
         _ads = GetComponent<ADS>();
-
         if (firePoint == null)
             firePoint = transform;
     }
@@ -41,7 +43,6 @@ public class Shooter : MonoBehaviour
     public void TryShoot(Vector3 origin, Vector3 direction)
     {
         if (Time.time < _nextFireTime) return;
-
         if (_reloader != null && !_reloader.HasAmmo())
         {
             OnDryFire?.Invoke();
@@ -52,20 +53,28 @@ public class Shooter : MonoBehaviour
         _reloader?.ConsumeBullet();
 
         float spread = IsADS ? adsSpread : baseSpread;
-        direction = ApplySpread(direction, spread);
 
-        if (Physics.Raycast(origin, direction, out RaycastHit hit, range, hitMask))
+        for (int i = 0; i < pelletCount; i++)
         {
-            if (hit.collider.TryGetComponent<Health>(out var health))
-                health.TakeDamage(damage, gameObject);
+            Vector3 pelletDir = ApplySpread(direction, spread);
 
-            if (hitEffectPrefab != null)
+            if (Physics.Raycast(origin, pelletDir, out RaycastHit hit, range, hitMask))
             {
-                GameObject hitEffect = Instantiate(hitEffectPrefab, hit.point, Quaternion.LookRotation(hit.normal));
-                Destroy(hitEffect, 0.5f);
-            }
+                float distanceFraction = hit.distance / range;
+                float falloffMultiplier = damageFalloff.Evaluate(distanceFraction);
+                float finalDamage = damage * falloffMultiplier;
 
-            OnHit?.Invoke(hit.point, hit.normal);
+                if (hit.collider.TryGetComponent<Health>(out var health))
+                    health.TakeDamage(finalDamage, gameObject);
+
+                if (hitEffectPrefab != null)
+                {
+                    GameObject hitEffect = Instantiate(hitEffectPrefab, hit.point, Quaternion.LookRotation(hit.normal));
+                    Destroy(hitEffect, 0.5f);
+                }
+
+                OnHit?.Invoke(hit.point, hit.normal);
+            }
         }
 
         OnShoot?.Invoke();
