@@ -1,13 +1,10 @@
 using UnityEngine;
 
-<<<<<<< Updated upstream
 /// <summary>
 /// Handles horizontal walk/run movement.
 /// Reads a movement direction set externally (by PlayerInputBridge or AI).
 /// Supports speed tiers: walk, run, sprint.
 /// </summary>
-=======
->>>>>>> Stashed changes
 [RequireComponent(typeof(CharacterMotor))]
 public class WalkRun : MonoBehaviour, IMovementModifier
 {
@@ -19,20 +16,12 @@ public class WalkRun : MonoBehaviour, IMovementModifier
     [Header("Acceleration")]
     [SerializeField] private float acceleration    = 15f;
     [SerializeField] private float deceleration    = 20f;
-<<<<<<< Updated upstream
     [SerializeField] private float airControlFactor = 0.4f; // Reduced control in air
 
     // Set by InputBridge or AI controller
     public Vector2 MoveInput { get; set; }   // Normalised WASD direction
     public bool IsSprinting  { get; set; }
     public bool IsWalking    { get; set; }   // Walk key held (slow)
-=======
-    [SerializeField] private float airControlFactor = 0.4f;
-
-    public Vector2 MoveInput { get; set; } 
-    public bool IsSprinting  { get; set; }
-    public bool IsWalking    { get; set; }
->>>>>>> Stashed changes
 
     public bool IsActive => MoveInput.sqrMagnitude > 0.01f;
 
@@ -65,10 +54,7 @@ public class WalkRun : MonoBehaviour, IMovementModifier
         Vector3 desiredHorizontal = wishDir * _currentSpeed;
         Vector3 currentHorizontal = new Vector3(currentVelocity.x, 0f, currentVelocity.z);
 
-<<<<<<< Updated upstream
         // Return only the delta needed to reach desired horizontal velocity
-=======
->>>>>>> Stashed changes
         return desiredHorizontal - currentHorizontal;
     }
 
