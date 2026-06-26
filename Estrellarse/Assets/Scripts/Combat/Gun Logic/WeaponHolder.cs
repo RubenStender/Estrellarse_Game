@@ -2,16 +2,6 @@ using UnityEngine;
 
 namespace Estrellarse.Weapons
 {
-    /// <summary>
-    /// Beheert welk IWeapon component op dit GameObject momenteel actief is
-    /// en regelt het wisselen daartussen. Dit is de daadwerkelijke
-    /// "player behaviour swap at runtime": wisselen van wapen is een
-    /// echte gedragsverandering (andere CanFire/TryFire logica), geen
-    /// aanpassing van een enkele waarde.
-    ///
-    /// Wordt zowel op de player als op enemies gebruikt; een enemy heeft
-    /// gewoonweg maar één wapen-component in de array staan.
-    /// </summary>
     public class WeaponHolder : MonoBehaviour
     {
         [Tooltip("Elk element moet een component zijn dat IWeapon implementeert (Shotgun, Pistol, Burst, AR, SMG).")]

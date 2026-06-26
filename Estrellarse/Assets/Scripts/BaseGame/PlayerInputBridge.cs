@@ -1,4 +1,5 @@
 using UnityEngine;
+using Estrellarse.Weapons;
 
 public class PlayerInputBridge : MonoBehaviour
 {

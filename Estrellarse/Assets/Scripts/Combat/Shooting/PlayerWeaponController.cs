@@ -3,12 +3,6 @@ using Estrellarse.Weapons;
 
 namespace Estrellarse.Player
 {
-    /// <summary>
-    /// Leest echte spelersinput (muis, toetsenbord) en stuurt op basis
-    /// daarvan de WeaponHolder aan. Bevat zelf geen schiet-logica; dat
-    /// zit volledig in de IWeapon implementaties. Deze class "speelt"
-    /// dus eigenlijk alleen de trigger in.
-    /// </summary>
     [RequireComponent(typeof(WeaponHolder))]
     public class PlayerWeaponController : MonoBehaviour
     {

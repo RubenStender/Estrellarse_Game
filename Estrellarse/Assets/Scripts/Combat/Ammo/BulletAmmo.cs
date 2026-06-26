@@ -2,15 +2,12 @@ using UnityEngine;
 
 namespace Estrellarse.Weapons
 {
-    /// <summary>
-    /// Standaard kogel-gedrag: brengt schade toe aan een Health component
-    /// op het geraakte object, als die bestaat.
-    /// </summary>
     public class BulletAmmo : MonoBehaviour, IAmmoBehaviour
     {
         public void OnHit(RaycastHit hit, float damage)
         {
-            if (hit.collider.TryGetComponent<Health>(out var health))
+            Health health = hit.collider.GetComponentInParent<Health>();
+            if (health != null)
                 health.TakeDamage(damage, gameObject);
         }
     }

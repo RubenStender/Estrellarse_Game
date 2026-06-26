@@ -5,12 +5,10 @@ namespace Estrellarse.Weapons
 {
     public class HitscanFirer : MonoBehaviour
     {
-        [Header("Hit Detection")]
+    
         [SerializeField] private LayerMask hitMask = ~0;
         [SerializeField] private GameObject hitEffectPrefab;
         [SerializeField] private float hitEffectLifetime = 0.5f;
-
-        [Header("Events")]
         public UnityEvent<RaycastHit, float> OnPelletHit;
 
         public void FirePellets(
@@ -29,6 +27,9 @@ namespace Estrellarse.Weapons
 
                 if (Physics.Raycast(origin, pelletDir, out RaycastHit hit, range, hitMask))
                 {
+                    Debug.DrawRay(origin, pelletDir * hit.distance, Color.green, 2f);
+                    Debug.Log($"HitscanFirer: raak {hit.collider.name} op {hit.distance:F1}m", this);
+
                     float distanceFraction = hit.distance / range;
                     float falloffMultiplier = damageFalloff != null
                         ? damageFalloff.Evaluate(distanceFraction)
@@ -38,6 +39,11 @@ namespace Estrellarse.Weapons
                     SpawnHitEffect(hit);
                     ammoBehaviour?.OnHit(hit, finalDamage);
                     OnPelletHit?.Invoke(hit, finalDamage);
+                }
+                else
+                {
+                    Debug.DrawRay(origin, pelletDir * range, Color.red, 2f);
+                    Debug.Log("HitscanFirer: pellet raakt niets", this);
                 }
             }
         }

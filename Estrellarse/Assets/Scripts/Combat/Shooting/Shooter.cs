@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.Events;
+using Estrellarse.Weapons;
 
 public class Shooter : MonoBehaviour
 {
@@ -28,6 +29,8 @@ public class Shooter : MonoBehaviour
 
     private Reloader _reloader;
     private ADS _ads;
+    private Camera _camera;
+
     public bool IsADS => _ads != null && _ads.IsAiming;
 
     private float _nextFireTime;
@@ -36,6 +39,8 @@ public class Shooter : MonoBehaviour
     {
         _reloader = GetComponent<Reloader>();
         _ads = GetComponent<ADS>();
+        _camera = Camera.main;
+
         if (firePoint == null)
             firePoint = transform;
     }
@@ -43,6 +48,7 @@ public class Shooter : MonoBehaviour
     public void TryShoot(Vector3 origin, Vector3 direction)
     {
         if (Time.time < _nextFireTime) return;
+
         if (_reloader != null && !_reloader.HasAmmo())
         {
             OnDryFire?.Invoke();
@@ -64,7 +70,9 @@ public class Shooter : MonoBehaviour
                 float falloffMultiplier = damageFalloff.Evaluate(distanceFraction);
                 float finalDamage = damage * falloffMultiplier;
 
-                if (hit.collider.TryGetComponent<Health>(out var health))
+                Health health = hit.collider.GetComponentInParent<Health>();
+                Debug.Log($"Hit: {hit.collider.gameObject.name} | Health gevonden: {health != null}");
+                if (health != null)
                     health.TakeDamage(finalDamage, gameObject);
 
                 if (hitEffectPrefab != null)
@@ -80,7 +88,12 @@ public class Shooter : MonoBehaviour
         OnShoot?.Invoke();
     }
 
-    public void TryShoot() => TryShoot(firePoint.position, firePoint.forward);
+    public void TryShoot()
+    {
+        Vector3 origin = _camera != null ? _camera.transform.position : firePoint.position;
+        Vector3 direction = _camera != null ? _camera.transform.forward : firePoint.forward;
+        TryShoot(origin, direction);
+    }
 
     private Vector3 ApplySpread(Vector3 dir, float spread)
     {

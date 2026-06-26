@@ -3,13 +3,6 @@ using UnityEngine.Events;
 
 namespace Estrellarse.Weapons
 {
-    /// <summary>
-    /// Wisselt het IAmmoBehaviour van een wapen op dit GameObject.
-    /// Momenteel een placeholder met een lege/standaard ammo-slot zodat
-    /// PlayerWeaponController kan compileren en getest worden; de echte
-    /// BulletAmmo/SmokeAmmo implementaties en hun toewijzing komen in de
-    /// volgende stap.
-    /// </summary>
     public class AmmoSwitcher : MonoBehaviour
     {
         [Tooltip("Elk element moet een component zijn dat IAmmoBehaviour implementeert.")]

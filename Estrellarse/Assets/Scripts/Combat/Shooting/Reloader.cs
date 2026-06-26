@@ -1,87 +1,55 @@
-using System.Collections;
 using UnityEngine;
 using UnityEngine.Events;
 
-/// <summary>
-/// Magazine + reserve ammo system. Attach next to Shooter.
-/// Shooter calls HasAmmo() and ConsumeBullet() — Reloader handles the rest.
-/// Works independently: you can also use it for anything else that consumes charges.
-/// </summary>
-public class Reloader : MonoBehaviour
+namespace Estrellarse.Weapons
 {
-    [Header("Ammo")]
-    [SerializeField] private int magazineSize   = 30;
-    [SerializeField] private int reserveAmmo    = 120;
-    [SerializeField] private bool infiniteAmmo  = false;
-
-    [Header("Reload")]
-    [SerializeField] private float reloadTime   = 1.8f;
-    [SerializeField] private bool  autoReload   = true;    // Reload automatically on empty
-
-    [Header("Events")]
-    public UnityEvent<int, int> OnAmmoChanged;  // (currentMag, reserve)
-    public UnityEvent OnReloadStart;
-    public UnityEvent OnReloadComplete;
-    public UnityEvent OnOutOfAmmo;
-
-    public int CurrentMag   { get; private set; }
-    public int ReserveAmmo  { get; private set; }
-    public bool IsReloading { get; private set; }
-
-    private void Awake()
+    public class Reloader : MonoBehaviour
     {
-        CurrentMag  = magazineSize;
-        ReserveAmmo = reserveAmmo;
-    }
+        [SerializeField] private int maxAmmo = 30;
+        [SerializeField] private float reloadTime = 1.5f;
 
-    public bool HasAmmo() => infiniteAmmo || CurrentMag > 0;
+        public UnityEvent OnReloadStart;
+        public UnityEvent OnReloadComplete;
+        public UnityEvent OnAmmoChanged;
 
-    public void ConsumeBullet()
-    {
-        if (infiniteAmmo) return;
+        private int _currentAmmo;
+        private bool _isReloading;
 
-        CurrentMag = Mathf.Max(0, CurrentMag - 1);
-        OnAmmoChanged?.Invoke(CurrentMag, ReserveAmmo);
+        public int CurrentAmmo => _currentAmmo;
+        public int MaxAmmo => maxAmmo;
 
-        if (CurrentMag == 0)
+        private void Awake() => _currentAmmo = maxAmmo;
+
+        public bool HasAmmo() => _currentAmmo > 0 && !_isReloading;
+
+        public void ConsumeBullet()
         {
-            if (ReserveAmmo > 0 && autoReload)
-                TryReload();
-            else if (ReserveAmmo == 0)
-                OnOutOfAmmo?.Invoke();
+            if (_currentAmmo <= 0) return;
+
+            _currentAmmo--;
+            OnAmmoChanged?.Invoke();
+
+            if (_currentAmmo == 0)
+                StartReload();
         }
-    }
 
-    /// <summary>Called by InputBridge on R press.</summary>
-    public void TryReload()
-    {
-        if (IsReloading)        return;
-        if (CurrentMag == magazineSize) return;
-        if (ReserveAmmo <= 0)  return;
+        public void TryReload() => StartReload();
 
-        StartCoroutine(ReloadRoutine());
-    }
+        public void StartReload()
+        {
+            if (_isReloading || _currentAmmo == maxAmmo) return;
 
-    public void AddReserveAmmo(int amount)
-    {
-        ReserveAmmo += amount;
-        OnAmmoChanged?.Invoke(CurrentMag, ReserveAmmo);
-    }
+            _isReloading = true;
+            OnReloadStart?.Invoke();
+            Invoke(nameof(FinishReload), reloadTime);
+        }
 
-    private IEnumerator ReloadRoutine()
-    {
-        IsReloading = true;
-        OnReloadStart?.Invoke();
-
-        yield return new WaitForSeconds(reloadTime);
-
-        int needed  = magazineSize - CurrentMag;
-        int loaded  = Mathf.Min(needed, ReserveAmmo);
-        CurrentMag  += loaded;
-        ReserveAmmo -= loaded;
-
-        IsReloading = false;
-        OnReloadComplete?.Invoke();
-        OnAmmoChanged?.Invoke(CurrentMag, ReserveAmmo);
+        private void FinishReload()
+        {
+            _currentAmmo = maxAmmo;
+            _isReloading = false;
+            OnReloadComplete?.Invoke();
+            OnAmmoChanged?.Invoke();
+        }
     }
 }

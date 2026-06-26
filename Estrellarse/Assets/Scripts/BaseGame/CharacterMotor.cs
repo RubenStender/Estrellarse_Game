@@ -1,11 +1,13 @@
 using System.Collections.Generic;
 using UnityEngine;
+
 [RequireComponent(typeof(CharacterController))]
 public class CharacterMotor : MonoBehaviour
 {
     [Header("Gravity")]
     [SerializeField] private float gravity = -20f;
     [SerializeField] private float groundedGravity = -2f;
+
     [Header("Ground Detection")]
     [SerializeField] private float groundCheckDistance = 0.1f;
     [SerializeField] private LayerMask groundMask = ~0;
@@ -24,6 +26,10 @@ public class CharacterMotor : MonoBehaviour
         _controller = GetComponent<CharacterController>();
     }
 
+    // Start garandeert dat alle andere components al Awake hebben gedraaid,
+    // zodat NavMeshMovementModifier zeker in de modifier-lijst zit.
+    private void Start() => RefreshModifiers();
+
     private void OnEnable() => RefreshModifiers();
     private void OnDisable() => RefreshModifiers();
 
@@ -40,6 +46,7 @@ public class CharacterMotor : MonoBehaviour
         Vector3 delta = Vector3.zero;
         foreach (var mod in _modifiers)
             delta += mod.GetVelocityDelta(_velocity, IsGrounded);
+
         _velocity += delta;
 
         float g = IsGrounded ? groundedGravity : gravity * GravityScale;
@@ -53,6 +60,7 @@ public class CharacterMotor : MonoBehaviour
 
     public void SetVerticalVelocity(float y) => _velocity.y = y;
     public void AddImpulse(Vector3 impulse) => _velocity += impulse;
+
     public void ZeroHorizontalVelocity()
     {
         _velocity.x = 0f;
@@ -64,6 +72,7 @@ public class CharacterMotor : MonoBehaviour
         Vector3 bottom = transform.position
                        + _controller.center
                        + Vector3.down * (_controller.height / 2f - _controller.radius);
+
         return Physics.SphereCast(bottom, _controller.radius * 0.9f,
             Vector3.down, out _, groundCheckDistance + 0.1f, groundMask);
     }

@@ -3,6 +3,12 @@ using UnityEngine.Events;
 
 namespace Estrellarse.Weapons
 {
+    /// <summary>
+    /// Gedeelde basis voor alle hitscan-wapens (Shotgun, Pistol, Burst, AR, SMG).
+    /// Regelt fire rate timing, reload-check en ADS-check zodat losse wapen
+    /// scripts alleen hun eigen pellet/spread/damage instellingen hoeven te
+    /// definiëren. Wordt zowel door de player als door enemies gebruikt.
+    /// </summary>
     [RequireComponent(typeof(HitscanFirer))]
     public abstract class HitscanWeaponBase : MonoBehaviour, IWeapon
     {
@@ -20,8 +26,11 @@ namespace Estrellarse.Weapons
         [SerializeField] protected AnimationCurve damageFalloff = AnimationCurve.Linear(0f, 1f, 1f, 1f);
 
         [Header("Events")]
-        public UnityEvent OnShoot;
-        public UnityEvent OnDryFire;
+        [SerializeField] private UnityEvent onShoot;
+        [SerializeField] private UnityEvent onDryFire;
+
+        public UnityEvent OnShoot => onShoot;
+        public UnityEvent OnDryFire => onDryFire;
 
         protected HitscanFirer firer;
         protected Reloader reloader;
@@ -35,7 +44,6 @@ namespace Estrellarse.Weapons
         {
             firer = GetComponent<HitscanFirer>();
             reloader = GetComponent<Reloader>();
-
             ammoBehaviour = GetComponent<IAmmoBehaviour>();
         }
 
@@ -57,11 +65,6 @@ namespace Estrellarse.Weapons
 
             OnShoot?.Invoke();
         }
-
-        /// <summary>
-        /// Stelt het ammo-gedrag van buitenaf in. Wordt gebruikt door de
-        /// AmmoSwitcher op de player om tussen Bullet/Smoke te wisselen.
-        /// </summary>
         public void SetAmmoBehaviour(IAmmoBehaviour behaviour) => ammoBehaviour = behaviour;
     }
 }
