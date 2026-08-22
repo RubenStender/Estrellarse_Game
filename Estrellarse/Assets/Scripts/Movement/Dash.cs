@@ -1,28 +1,24 @@
 using System.Collections;
 using UnityEngine;
 
-/// <summary>
-/// Dash ability. Burst of speed in the move direction (or forward if idle).
-/// Fully standalone — add this component to give any character a dash.
-/// </summary>
 [RequireComponent(typeof(CharacterMotor))]
 public class Dash : MonoBehaviour, IMovementModifier
 {
     [Header("Dash Settings")]
-    [SerializeField] private float dashForce     = 18f;
+    [SerializeField] private float dashForce     = 35f;
     [SerializeField] private float dashDuration  = 0.18f;
     [SerializeField] private float cooldown      = 1.2f;
-    [SerializeField] private int   dashCharges   = 1;        // How many dashes before cooldown
+    [SerializeField] private int   dashCharges   = 1;        
     [SerializeField] private bool  canDashInAir  = true;
 
     [Header("Feel")]
-    [SerializeField] private float dashGravityScale = 0f;    // Freeze gravity mid-dash
+    [SerializeField] private float dashGravityScale = 0f;    
 
     public bool IsActive     => _isDashing;
     public bool IsOnCooldown => _chargesLeft <= 0;
-    public float CooldownProgress => 1f - (_cooldownTimer / cooldown); // 0..1
+    public float CooldownProgress => 1f - (_cooldownTimer / cooldown); 
 
-    // Called by InputBridge
+ 
     public void TryDash(Vector3 worldDirection)
     {
         if (_isDashing)            return;

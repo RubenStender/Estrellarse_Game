@@ -7,11 +7,11 @@ namespace Estrellarse.Enemy
     [RequireComponent(typeof(CharacterMotor))]
     public class NavMeshMovementModifier : MonoBehaviour, IMovementModifier
     {
-        [Header("Referenties")]
         [SerializeField] private Transform target;
 
         private NavMeshAgent _agent;
         private IEnemySpeed _speedProfile;
+        private IEnemyBehaviour _behaviour;
 
         public bool IsActive => target != null && _agent != null && _agent.isOnNavMesh;
 
@@ -19,6 +19,7 @@ namespace Estrellarse.Enemy
         {
             _agent = GetComponent<NavMeshAgent>();
             _speedProfile = GetComponent<IEnemySpeed>();
+            _behaviour = GetComponent<IEnemyBehaviour>();
 
             _agent.updatePosition = false;
             _agent.updateRotation = false;
@@ -32,14 +33,19 @@ namespace Estrellarse.Enemy
             {
                 Debug.LogWarning("NavMeshMovementModifier: geen IEnemySpeed gevonden op " + gameObject.name, this);
             }
+
+            if (_behaviour == null)
+                Debug.LogWarning("NavMeshMovementModifier: geen IEnemyBehaviour gevonden op " + gameObject.name, this);
         }
 
         private void Update()
         {
             if (target == null) return;
 
-            _agent.SetDestination(target.position);
+            // Gedrag bepaalt de destinatie
+            _behaviour?.Tick(transform, target, _agent);
 
+            // Synchroniseer NavMesh positie met CharacterController
             _agent.nextPosition = transform.position;
 
             HandleRotation();
@@ -69,7 +75,6 @@ namespace Estrellarse.Enemy
             if (_agent.desiredVelocity.sqrMagnitude < 0.1f) return;
 
             float rotSpeed = _speedProfile != null ? _speedProfile.RotationSpeed : 8f;
-
             Vector3 lookDir = _agent.desiredVelocity;
             lookDir.y = 0f;
 

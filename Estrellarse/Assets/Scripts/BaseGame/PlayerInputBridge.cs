@@ -16,7 +16,6 @@ public class PlayerInputBridge : MonoBehaviour
     private Shooter _shooter;
     private Reloader _reloader;
     private ADS _ads;
-    private Melee _melee;
     private PoleGrab _poleGrab;
 
     private void Awake()
@@ -24,18 +23,21 @@ public class PlayerInputBridge : MonoBehaviour
         _motor = GetComponent<CharacterMotor>();
         _walkRun = GetComponent<WalkRun>();
         _jump = GetComponent<Jump>();
-        _dash = GetComponent<Dash>();
         _slide = GetComponent<Slide>();
         _wallRun = GetComponent<WallRun>();
         _shooter = GetComponent<Shooter>();
         _reloader = GetComponent<Reloader>();
         _ads = GetComponent<ADS>();
-        _melee = GetComponent<Melee>();
         _poleGrab = GetComponent<PoleGrab>();
+        // Dash wordt NIET hier opgehaald — die bestaat nog niet bij Awake
     }
 
     private void Update()
     {
+        // Probeer Dash op te halen zodra de pickup hem toevoegt
+        if (_dash == null)
+            _dash = GetComponent<Dash>();
+
         HandleMovementInput();
         HandleCombatInput();
         HandleMouseLook();
@@ -68,14 +70,11 @@ public class PlayerInputBridge : MonoBehaviour
         {
             Vector3 dir = Vector3.zero;
             if (_walkRun != null && _walkRun.MoveInput.sqrMagnitude > 0.01f)
-            {
                 dir = transform.right * _walkRun.MoveInput.x
                     + transform.forward * _walkRun.MoveInput.y;
-            }
             else
-            {
                 dir = transform.forward;
-            }
+
             _dash.TryDash(dir);
         }
 
@@ -100,9 +99,6 @@ public class PlayerInputBridge : MonoBehaviour
 
         if (_reloader != null && Input.GetKeyDown(KeyCode.R))
             _reloader.TryReload();
-
-        if (_melee != null && Input.GetKeyDown(KeyCode.V))
-            _melee.TryMelee();
     }
 
     private void HandleMouseLook()
